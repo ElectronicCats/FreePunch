@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checador - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 {
+            color: #667eea;
+        }
+        
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .login-form, .admin-panel {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 50px auto;
+        }
+        
+        .admin-panel {
+            max-width: 100%;
+            margin: 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        input[type="password"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 10px 5px 10px 0;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .status {
+            padding: 20px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .enrollment-steps {
+            margin: 20px 0;
+        }
+        
+        .step {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+        
+        .step.active {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+        }
+        
+        .step.complete {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        
+        .sync-status {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐Admin Panel</h1>
+            <a href="/" class="back-link">← Back to Kiosk</a>
+            </header>
+<!-- Login Form -->
+    <div id="loginForm" class="login-form">
+        <h2>Admin Login</h2>
+        <input type="password" id="password" placeholder="Enter admin password">
+        <button onclick="login()">Login</button>
+        <div id="loginStatus"></div>
+    </div>
+    
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel hidden">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('enroll')">Enroll User</button>
+            <button class="tab" onclick="showTab('users')">Users</button>
+            <button class="tab" onclick="showTab('sync')">Sync</button>
+        </div>
+        
+        <!-- Enroll Tab -->
+        <div id="enrollTab" class="tab-content active">
+            <h2>Enroll New User</h2>
+            <div id="enrollForm">
+                <input type="text" id="employeeName" placeholder="Employee Name">
+                <input type="text" id="employeeCode" placeholder="Employee Code">
+                <button onclick="startEnrollment()">Start Enrollment</button>
+            </div>
+            
+            <div id="enrollmentSteps" class="enrollment-steps hidden">
+                <div class="step" id="step1">Step 1: Place finger</div>
+                <div class="step" id="step2">Step 2: Place finger again</div>
+                <div class="step" id="step3">Step 3: Place finger one more time</div>
+                <button onclick="captureSample()">Capture Sample</button>
+            </div>
+            
+            <div id="enrollStatus"></div>
+        </div>
+        
+        <!-- Users Tab -->
+        <div id="usersTab" class="tab-content">
+            <h2>Enrolled Users</h2>
+            <button onclick="loadUsers()">Refresh</button>
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Employee Code</th>
+                        <th>Active</th>
+                        <th>Templates</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Sync Tab -->
+        <div id="syncTab" class="tab-content">
+            <h2>Server Sync</h2>
+            <div id="syncStatusDiv" class="sync-status"></div>
+            <button onclick="loadSyncStatus()">Refresh Status</button>
+            <button onclick="triggerSync()">Sync Now</button>
+            <div id="syncMessage"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let adminToken = null;
+    let enrollUserId = null;
+    let currentSample = 0;
+    
+    async function login() {
+        const password = document.getElementById('password').value;
+        const statusDiv = document.getElementById('loginStatus');
+        
+        try {
+            const response = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({password})
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                adminToken = data.token;
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('hidden');
+            } else {
+                statusDiv.innerHTML = '<div class="status error">Invalid password</div>';
+            }
+        } catch (error) {
+            statusDiv.innerHTML = '<div class="status error">Connection error</div>';
+        }
+    }
+    
+    function showTab(tabName) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        
+        event.target.classList.add('active');
+        document.getElementById(tabName + 'Tab').classList.add('active');
+        
+        if (tabName === 'users') loadUsers();
+        if (tabName === 'sync') loadSyncStatus();
+    }
+    
+    async function startEnrollment() {
+        const name = document.getElementById('employeeName').value;
+        const code = document.getElementById('employeeCode').value;
+        const statusDiv = document.getElementById('enrollStatus');
+        
+        if (!name || !code) {
+            statusDiv.innerHTML = '<div class="status error">Please fill all fields</div>';
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/admin/enroll/start', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name, employee_code: code, token: adminToken})
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                enrollUserId = data.user_id;
+                currentSample = 0;
+                document.getElementById('enrollForm').classList.add('hidden');
+                document.getElementById('enrollmentSteps').classList.remove('hidden');
+                document.getElementById('step1').classList.add('active');
+                statusDiv.innerHTML = '<div class="status success">User created. Ready for fingerprint capture.</div>';
+            } else {
+                statusDiv.innerHTML = '<div class="status error">' + data.message + '</div>';
+            }
+        } catch (error) {
+            statusDiv.innerHTML = '<div class="status error">Connection error</div>';
+        }
+    }
+    
+    async function captureSample() {
+        const statusDiv = document.getElementById('enrollStatus');
+        currentSample++;
+        
+        try {
+            const response = await fetch(`/api/admin/enroll/capture?user_id=${enrollUserId}&sample_number=${currentSample}&token=${adminToken}`, {
+                method: 'POST'
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const stepDiv = document.getElementById('step' + currentSample);
+                stepDiv.classList.remove('active');
+                stepDiv.classList.add('complete');
+                stepDiv.textContent += ' ✓ (Quality: ' + data.quality + ')';
+                
+                if (currentSample < 3) {
+                    const nextStep = document.getElementById('step' + (currentSample + 1));
+                    nextStep.classList.add('active');
+                    statusDiv.innerHTML = '<div class="status success">Sample ' + currentSample + ' captured. Continue...</div>';
+                } else {
+                    statusDiv.innerHTML = '<div class="status success">Enrollment complete!</div>';
+                    setTimeout(() => {
+                        document.getElementById('enrollForm').classList.remove('hidden');
+                        document.getElementById('enrollmentSteps').classList.add('hidden');
+                        document.getElementById('employeeName').value = '';
+                        document.getElementById('employeeCode').value = '';
+                        document.querySelectorAll('.step').forEach(s => {
+                            s.classList.remove('active', 'complete');
+                        });
+                    }, 2000);
+                }
+            } else {
+                statusDiv.innerHTML = '<div class="status error">' + data.message + '</div>';
+                currentSample--;
+            }
+        } catch (error) {
+            statusDiv.innerHTML = '<div class="status error">Connection error</div>';
+            currentSample--;
+        }
+    }
+    
+    async function loadUsers() {
+        const tbody = document.getElementById('usersTableBody');
+        
+        try {
+            const response = await fetch(`/api/admin/users?token=${adminToken}`);
+            const users = await response.json();
+            
+            tbody.innerHTML = '';
+            users.forEach(user => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.employee_code}</td>
+                    <td>${user.active ? 'Yes' : 'No'}</td>
+                    <td>${user.template_count}</td>
+                    <td>
+                        ${user.active ? `<button onclick="deactivateUser(${user.id})">Deactivate</button>` : ''}
+                    </td>
+                `;
+            });
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="6">Error loading users</td></tr>';
+        }
+    }
+    
+    async function deactivateUser(userId) {
+        if (!confirm('Deactivate this user?')) return;
+        
+        try {
+            await fetch(`/api/admin/users/${userId}/deactivate?token=${adminToken}`, {
+                method: 'POST'
+            });
+            loadUsers();
+        } catch (error) {
+            alert('Error deactivating user');
+        }
+    }
+    
+    async function loadSyncStatus() {
+        const statusDiv = document.getElementById('syncStatusDiv');
+        
+        try {
+            const response = await fetch('/api/sync/status');
+            const data = await response.json();
+            
+            statusDiv.innerHTML = `
+                <p><strong>Enabled:</strong> ${data.enabled ? 'Yes' : 'No'}</p>
+                <p><strong>Running:</strong> ${data.running ? 'Yes' : 'No'}</p>
+                ${data.server_url ? `<p><strong>Server:</strong> ${data.server_url}</p>` : ''}
+                <p><strong>Unsynced Punches:</strong> ${data.unsynced_count}</p>
+            `;
+        } catch (error) {
+            statusDiv.innerHTML = '<p>Error loading sync status</p>';
+        }
+    }
+    
+    async function triggerSync() {
+        const msgDiv = document.getElementById('syncMessage');
+        
+        try {
+            const response = await fetch(`/api/sync/trigger?token=${adminToken}`, {
+                method: 'POST'
+            });
+            const data = await response.json();
+            
+            msgDiv.innerHTML = `<div class="status ${data.success ? 'success' : 'error'}">${data.message}</div>`;
+            setTimeout(() => loadSyncStatus(), 1000);
+        } catch (error) {
+            msgDiv.innerHTML = '<div class="status error">Connection error</div>';
+        }
+    }
+</script>
+</body>
+</html>

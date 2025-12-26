@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checador - Time Clock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .device-id {
+            color: #999;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+        
+        .status {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .status.waiting {
+            color: #666;
+        }
+        
+        .status.processing {
+            color: #ffa500;
+        }
+        
+        .status.success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status.error {
+            color: #dc3545;
+        }
+        
+        .punch-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 1.5em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 20px 0;
+        }
+        
+        .punch-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .punch-button:active {
+            transform: scale(0.95);
+        }
+        
+        .punch-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-card {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            display: none;
+        }
+        
+        .result-card.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .result-card h2 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        .result-info {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        
+        .punch-type-in {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .punch-type-out {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .admin-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            color: #667eea;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        
+        .admin-link:hover {
+            background: white;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/admin" class="admin-link">Admin</a>
+    
+    <div class="container">
+        <h1>⏱️ Checador</h1>
+        <div class="device-id">Device: {{ device_id }}</div>
+        
+        <div id="status" class="status waiting">
+            Place your finger to punch in or out
+        </div>
+        
+        <button id="punchBtn" class="punch-button">
+            👆 Punch Now
+        </button>
+        
+        <div id="resultCard" class="result-card">
+            <h2>Punch Recorded!</h2>
+            <div class="result-info">
+                <strong>Employee:</strong> <span id="userName"></span>
+            </div>
+            <div class="result-info">
+                <strong>Type:</strong> <span id="punchType"></span>
+            </div>
+            <div class="result-info">
+                <strong>Match Score:</strong> <span id="matchScore"></span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const punchBtn = document.getElementById('punchBtn');
+        const status = document.getElementById('status');
+        const resultCard = document.getElementById('resultCard');
+        const userName = document.getElementById('userName');
+        const punchType = document.getElementById('punchType');
+        const matchScore = document.getElementById('matchScore');
+        
+        async function punch() {
+            try {
+                punchBtn.disabled = true;
+                resultCard.classList.remove('show');
+                
+                status.className = 'status processing';
+                status.innerHTML = '<div class="spinner"></div>';
+                
+                const response = await fetch('/api/punch', {
+                    method: 'POST',
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    status.className = 'status success';
+                    status.textContent = '✓ ' + data.message;
+                    
+                    userName.textContent = data.user_name;
+                    punchType.textContent = data.punch_type;
+                    punchType.className = data.punch_type === 'IN' ? 'punch-type-in' : 'punch-type-out';
+                    matchScore.textContent = data.match_score;
+                    
+                    resultCard.classList.add('show');
+                    
+                    setTimeout(() => {
+                        status.className = 'status waiting';
+                        status.textContent = 'Place your finger to punch in or out';
+                        resultCard.classList.remove('show');
+                        punchBtn.disabled = false;
+                    }, 5000);
+                } else {
+                    status.className = 'status error';
+                    status.textContent = '✗ ' + data.message;
+                    
+                    setTimeout(() => {
+                        status.className = 'status waiting';
+                        status.textContent = 'Place your finger to punch in or out';
+                        punchBtn.disabled = false;
+                    }, 3000);
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = '✗ Connection error';
+                
+                setTimeout(() => {
+                    status.className = 'status waiting';
+                    status.textContent = 'Place your finger to punch in or out';
+                    punchBtn.disabled = false;
+                }, 3000);
+            }
+        }
+        
+        punchBtn.addEventListener('click', punch);
+    </script>
+</body>
+</html>
