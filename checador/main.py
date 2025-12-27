@@ -17,6 +17,7 @@ from checador.sync import SyncWorker
 from checador.autopunch import AutoPunchWorker
 from checador.api import admin, calibration, punch, sync, autopunch
 
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -56,7 +57,7 @@ app.include_router(admin.router)
 app.include_router(punch.router)
 app.include_router(sync.router)
 app.include_router(calibration.router)
-app.include_router(c.router)
+app.include_router(autopunch.router)
 
 
 @app.on_event("startup")
