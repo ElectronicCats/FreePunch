@@ -95,6 +95,29 @@ def deactivate_user(args):
     asyncio.run(_deactivate())
 
 
+def delete_user(args):
+    """Delete a user."""
+    async def _delete():
+        config = Config(args.config)
+        db = Database(config.database_path)
+        await db.initialize()
+        
+        user = await db.get_user_by_code(args.employee_code)
+        if not user:
+            print(f"User not found: {args.employee_code}")
+            return
+        
+        confirm = input(f"Are you sure you want to PERMANENTLY delete {user.name} and all their data? (y/N): ")
+        if confirm.lower() != 'y':
+            print("Operation cancelled")
+            return
+        
+        await db.delete_user(user.id)
+        print(f"User deleted: {user.name} ({user.employee_code})")
+    
+    asyncio.run(_delete())
+
+
 def test_camera(args):
     """Test camera."""
     config = Config(args.config)
@@ -167,6 +190,9 @@ def main():
     deactivate_parser = users_subparsers.add_parser('deactivate', help='Deactivate user')
     deactivate_parser.add_argument('--employee-code', required=True, help='Employee code')
     
+    delete_parser = users_subparsers.add_parser('delete', help='Delete user permanently')
+    delete_parser.add_argument('--employee-code', required=True, help='Employee code')
+    
     # Camera command
     camera_parser = subparsers.add_parser('camera', help='Camera utilities')
     camera_subparsers = camera_parser.add_subparsers(dest='camera_command')
@@ -192,6 +218,8 @@ def main():
                 list_users(args)
             elif args.users_command == 'deactivate':
                 deactivate_user(args)
+            elif args.users_command == 'delete':
+                delete_user(args)
         elif args.command == 'camera':
             if args.camera_command == 'test':
                 test_camera(args)

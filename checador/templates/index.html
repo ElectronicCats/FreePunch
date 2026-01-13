@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #000000;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -22,30 +22,41 @@
         }
         
         .container {
-            background: white;
+            background: #111;
             border-radius: 20px;
             padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 20px rgba(50, 205, 50, 0.2);
             text-align: center;
             max-width: 600px;
             width: 90%;
+            border: 1px solid #333;
         }
         
         h1 {
-            color: #667eea;
-            margin-bottom: 10px;
+            color: #32cd32;
+            margin-bottom: 20px;
             font-size: 2.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .logo {
+            height: 60px;
+            width: auto;
         }
         
         .device-id {
-            color: #999;
+            color: #666;
             font-size: 0.9em;
             margin-bottom: 30px;
+            font-family: monospace;
         }
         
         .autopunch-indicator {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
+            background: linear-gradient(135deg, #32cd32 0%, #228b22 100%);
+            color: black;
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
@@ -53,6 +64,7 @@
             font-size: 1.1em;
             display: none;
             animation: pulse 2s infinite;
+            border: 1px solid #32cd32;
         }
         
         .autopunch-indicator.active {
@@ -60,8 +72,8 @@
         }
         
         @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.02); }
+            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 10px rgba(50, 205, 50, 0.5); }
+            50% { opacity: 0.8; transform: scale(1.02); box-shadow: 0 0 20px rgba(50, 205, 50, 0.8); }
         }
         
         .status {
@@ -73,32 +85,37 @@
             justify-content: center;
             padding: 20px;
             border-radius: 10px;
+            background: #222;
+            color: #ccc;
+            border: 1px solid #444;
         }
         
         .status.waiting {
-            color: #666;
-            background: #f8f9fa;
+            color: #aaa;
         }
         
         .status.processing {
-            color: #856404;
-            background: #fff3cd;
+            color: #ffd700;
+            background: #332b00;
+            border-color: #ffd700;
         }
         
         .status.success {
-            color: #28a745;
+            color: #32cd32;
             font-weight: bold;
-            background: #d4edda;
+            background: #003300;
+            border-color: #32cd32;
         }
         
         .status.error {
-            color: #dc3545;
-            background: #f8d7da;
+            color: #ff4444;
+            background: #330000;
+            border-color: #ff4444;
         }
         
         .punch-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #32cd32 0%, #228b22 100%);
+            color: black;
             border: none;
             padding: 20px 60px;
             font-size: 1.5em;
@@ -106,11 +123,14 @@
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             margin: 20px 0;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .punch-button:hover {
             transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 0 30px rgba(50, 205, 50, 0.6);
         }
         
         .punch-button:active {
@@ -131,7 +151,8 @@
             margin-top: 30px;
             padding: 20px;
             border-radius: 10px;
-            background: #f8f9fa;
+            background: #222;
+            border: 1px solid #444;
             display: none;
         }
         
@@ -142,21 +163,22 @@
         
         .result-card h2 {
             margin-bottom: 15px;
-            color: #667eea;
+            color: #32cd32;
         }
         
         .result-info {
             font-size: 1.1em;
             margin: 10px 0;
+            color: #ccc;
         }
         
         .punch-type-in {
-            color: #28a745;
+            color: #32cd32;
             font-weight: bold;
         }
         
         .punch-type-out {
-            color: #dc3545;
+            color: #ff4444;
             font-weight: bold;
         }
         
@@ -164,22 +186,24 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.6);
             padding: 10px 20px;
             border-radius: 25px;
             text-decoration: none;
-            color: #667eea;
+            color: #32cd32;
             font-weight: bold;
             transition: background 0.2s;
+            border: 1px solid #32cd32;
         }
         
         .admin-link:hover {
-            background: white;
+            background: #32cd32;
+            color: black;
         }
         
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border: 4px solid #333;
+            border-top: 4px solid #32cd32;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -208,7 +232,7 @@
     <a href="/admin" class="admin-link">Admin</a>
     
     <div class="container">
-        <h1>⏱️ Checador</h1>
+        <h1><img src="/static/logo.png" alt="Logo" class="logo"> Checador</h1>
         <div class="device-id">Device: {{ device_id }}</div>
         
         <div id="autopunchIndicator" class="autopunch-indicator">

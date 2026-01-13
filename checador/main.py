@@ -44,6 +44,9 @@ app.include_router(punch.router)
 app.include_router(sync.router)
 app.include_router(autopunch.router)
 
+# Mount static files
+app.mount("/static", StaticFiles(directory="checador/static"), name="static")
+
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):

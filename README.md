@@ -10,6 +10,7 @@ Offline-first fingerprint attendance system for headless Debian systems.
 - **Offline-First**: All data stored locally in SQLite, optional server sync
 - **Auto-Toggle**: Intelligent IN/OUT punch detection per user
 - **Anti-Bounce**: Prevents duplicate punches within 10 seconds
+- **Auto-Punch**: Automatic finger detection and punch triggering
 - **Admin Panel**: Employee enrollment, user management, sync control
 - **CLI Tools**: Export to CSV, camera testing, user management
 
@@ -29,7 +30,7 @@ git clone https://github.com/ElectronicCats/uvc-fingerprint-server.git /opt/chec
 cd /opt/checador
 
 # Run installation script
-sudo ./scripts/install.sh
+sudo ./scripts/install_all.sh
 
 # Follow the on-screen instructions
 ```
@@ -186,31 +187,56 @@ python3 -m checador.main
 Edit `/etc/checador/config.toml`:
 ```toml
 [app]
+# Application settings
 device_id = "CHECADOR-001"
-data_dir = "/var/lib/checador"
+host = "0.0.0.0"
+port = 8000
+admin_password_hash = "$argon2id$v=19$m=65536,t=3,p=4$..."
 
 [camera]
+# Camera settings
 device = "/dev/video0"
-width = 640
-height = 480
-roi_x = 100
-roi_y = 100
-roi_width = 400
-roi_height = 400
+resolution_width = 640
+resolution_height = 480
+roi_x = 0
+roi_y = 0
+roi_width = 640
+roi_height = 480
 
 [fingerprint]
-nbis_mindtct = "/usr/local/nbis/bin/mindtct"
-nbis_bozorth3 = "/usr/local/nbis/bin/bozorth3"
+# Fingerprint matching settings
+mindtct_path = "/usr/local/nbis/bin/mindtct"
+bozorth3_path = "/usr/local/nbis/bin/bozorth3"
 match_threshold = 40
-enrollment_samples = 3
+min_quality_score = 20
+required_templates = 3
 
-[admin]
-password_hash = "$argon2id$v=19$m=65536,t=3,p=4$..."
+[database]
+# Database settings
+path = "/var/lib/checador/checador.db"
+
+[storage]
+# Storage paths
+template_dir = "/var/lib/checador/templates"
+temp_dir = "/var/lib/checador/temp"
+
+[timeclock]
+# Time clock settings
+antibounce_seconds = 10
 
 [server]
+# Server sync settings
 enabled = false
 url = "https://your-server.com/api"
 api_key = "your-api-key"
+sync_interval_minutes = 5
+
+[autopunch]
+# Auto-punch settings
+enabled_on_startup = false
+cooldown_seconds = 5
+difference_threshold = 0.15
+stable_frames = 3
 ```
 
 ## Server API Protocol

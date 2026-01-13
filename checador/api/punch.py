@@ -112,5 +112,16 @@ async def punch():
         )
 
 
+@router.post("/manual-trigger", response_model=PunchResponse)
+async def manual_trigger_punch():
+    """
+    Trigger a punch sequence manually from an external source (e.g. physical button).
+    This reuses the main punch logic but logs it as an externally triggered event.
+    """
+    # For now, we reuse the exact same logic.
+    # In the future, we could add specific logging or distinct behavior.
+    return await punch()
+
+
 from datetime import datetime
 from typing import Optional

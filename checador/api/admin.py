@@ -292,3 +292,21 @@ async def deactivate_user(user_id: int, token: str):
     logger.info(f"User {user_id} deactivated")
     
     return {"success": True}
+
+
+@router.delete("/users/{user_id}")
+async def delete_user(user_id: int, token: str):
+    """Delete a user permanently."""
+    if not verify_token(token):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    
+    config = get_config()
+    db = Database(config.database_path)
+    
+    success = await db.delete_user(user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    logger.info(f"User {user_id} deleted")
+    
+    return {"success": True}

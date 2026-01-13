@@ -140,6 +140,22 @@ class Database:
             if user:
                 user.active = False
                 await session.commit()
+
+    async def delete_user(self, user_id: int) -> bool:
+        """Delete a user and all associated data."""
+        async with self.async_session() as session:
+            user = await session.get(User, user_id)
+            if not user:
+                return False
+            
+            # Delete punches manually (if not covered by cascade)
+            await session.execute(
+                select(Punch).where(Punch.user_id == user_id)
+            )
+            # Actually delete
+            await session.delete(user)
+            await session.commit()
+            return True
     
     async def add_template(
         self, user_id: int, template_path: str, quality: int

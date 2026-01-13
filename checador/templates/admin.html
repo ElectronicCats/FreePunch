@@ -13,9 +13,10 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-            min-height: 100vh;
+            background: #000000;
+            margin: 0;
             padding: 20px;
+            color: #ccc;
         }
         
         .container {
@@ -24,33 +25,35 @@
         }
         
         header {
-            background: white;
+            background: #111;
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(50, 205, 50, 0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid #333;
         }
         
         h1 {
-            color: #667eea;
+            color: #32cd32;
         }
         
         .back-link {
-            color: #667eea;
+            color: #32cd32;
             text-decoration: none;
             font-weight: bold;
         }
         
         .login-form, .admin-panel {
-            background: white;
+            background: #111;
             padding: 40px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(50, 205, 50, 0.2);
             max-width: 500px;
             margin: 50px auto;
+            border: 1px solid #333;
         }
         
         .admin-panel {
@@ -66,30 +69,40 @@
             width: 100%;
             padding: 12px;
             margin: 10px 0;
-            border: 2px solid #ddd;
+            border: 1px solid #444;
             border-radius: 5px;
             font-size: 1em;
+            background: #222;
+            color: white;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #32cd32;
         }
         
         button {
-            background: #667eea;
+            background: #333;
             color: white;
-            border: none;
+            border: 1px solid #555;
             padding: 12px 30px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 1em;
             margin: 10px 5px 10px 0;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
         
         button:hover {
-            background: #5568d3;
+            background: #444;
+            border-color: #32cd32;
         }
         
         button:disabled {
-            background: #ccc;
+            background: #222;
+            color: #666;
             cursor: not-allowed;
+            border-color: #333;
         }
         
         .tabs {
@@ -100,16 +113,18 @@
         
         .tab {
             padding: 12px 24px;
-            background: #e0e0e0;
-            border: none;
+            background: #222;
+            border: 1px solid #444;
             border-radius: 5px;
             cursor: pointer;
             font-size: 1em;
+            color: #ccc;
         }
         
         .tab.active {
-            background: #667eea;
-            color: white;
+            background: #003300;
+            color: #32cd32;
+            border-color: #32cd32;
         }
         
         .tab-content {
@@ -129,12 +144,17 @@
         th, td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #333;
         }
         
         th {
-            background: #f8f9fa;
+            background: #222;
             font-weight: bold;
+            color: #32cd32;
+        }
+        
+        tr:hover {
+            background-color: #222;
         }
         
         .status {
@@ -144,18 +164,21 @@
         }
         
         .status.success {
-            background: #d4edda;
-            color: #155724;
+            background: #003300;
+            color: #32cd32;
+            border: 1px solid #32cd32;
         }
         
         .status.error {
-            background: #f8d7da;
-            color: #721c24;
+            background: #330000;
+            color: #ff4444;
+            border: 1px solid #ff4444;
         }
         
         .status.info {
-            background: #d1ecf1;
-            color: #0c5460;
+            background: #001f3f;
+            color: #39cccc;
+            border: 1px solid #39cccc;
         }
         
         .enrollment-steps {
@@ -166,24 +189,27 @@
             padding: 15px;
             margin: 10px 0;
             border-radius: 5px;
-            background: #f8f9fa;
+            background: #222;
+            border: 1px solid #444;
         }
         
         .step.active {
-            background: #e7f3ff;
-            border-left: 4px solid #667eea;
+            background: #003300;
+            border-left: 4px solid #32cd32;
         }
         
         .step.complete {
-            background: #d4edda;
-            border-left: 4px solid #28a745;
+            background: #002200;
+            border-left: 4px solid #00aa00;
+            color: #00aa00;
         }
         
         .sync-status {
             padding: 20px;
-            background: #f8f9fa;
+            background: #222;
             border-radius: 5px;
             margin: 20px 0;
+            border: 1px solid #444;
         }
     </style>
 </head>
