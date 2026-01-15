@@ -14,10 +14,12 @@ from sqlalchemy import (
     Integer,
     String,
     create_engine,
+    delete,
+    func,
     select,
 )
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy.orm import declarative_base, relationship, selectinload, sessionmaker
 
 Base = declarative_base()
 
@@ -34,6 +36,7 @@ class User(Base):
     
     templates = relationship("Template", back_populates="user", cascade="all, delete-orphan")
     punches = relationship("Punch", back_populates="user")
+    devices = relationship("Device", back_populates="user", cascade="all, delete-orphan")
 
 
 class Template(Base):
@@ -65,6 +68,21 @@ class Punch(Base):
     sync_at = Column(DateTime, nullable=True)
     
     user = relationship("User", back_populates="punches")
+
+
+class Device(Base):
+    """Enrolled device model."""
+    __tablename__ = "devices"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    token = Column(String(100), unique=True, nullable=False)
+    name = Column(String(100), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    # Security fields
+    enrolled_user_agent = Column(String(500), nullable=True)
+
+    user = relationship("User", back_populates="devices")
 
 
 class Setting(Base):
@@ -145,17 +163,82 @@ class Database:
         """Delete a user and all associated data."""
         async with self.async_session() as session:
             user = await session.get(User, user_id)
-            if not user:
-                return False
-            
-            # Delete punches manually (if not covered by cascade)
-            await session.execute(
-                select(Punch).where(Punch.user_id == user_id)
+            if user:
+                # Manually delete punches first (no cascade on Punch)
+                await session.execute(
+                    delete(Punch).where(Punch.user_id == user_id)
+                )
+                # Templates and Devices are handled by cascade
+                await session.delete(user)
+                await session.commit()
+                return True
+            return False
+
+    async def register_device(
+        self, user_id: int, token: str, name: str, user_agent: str = None
+    ) -> Optional[Device]:
+        """Register a new device for a user."""
+        async with self.async_session() as session:
+            # Check if token exists
+            result = await session.execute(select(Device).where(Device.token == token))
+            if result.scalar_one_or_none():
+                return None
+
+            device = Device(
+                user_id=user_id,
+                token=token,
+                name=name,
+                enrolled_user_agent=user_agent,
             )
-            # Actually delete
-            await session.delete(user)
-            await session.commit()
-            return True
+            session.add(device)
+            try:
+                await session.commit()
+                await session.refresh(device)
+                return device
+            except:
+                await session.rollback()
+                return None
+
+    async def get_device_by_token(self, token: str) -> Optional[Device]:
+        """Get device by token."""
+        async with self.async_session() as session:
+            result = await session.execute(
+                select(Device)
+                .where(Device.token == token)
+                .options(selectinload(Device.user))
+            )
+            return result.scalar_one_or_none()
+
+    async def delete_device(self, device_id: int) -> bool:
+        """Delete a device."""
+        async with self.async_session() as session:
+            device = await session.get(Device, device_id)
+            if device:
+                await session.delete(device)
+                await session.commit()
+                return True
+            return False
+
+    async def update_device_user_agent(self, token: str, user_agent: str) -> bool:
+        """Update device's stored User-Agent (for handling browser updates)."""
+        async with self.async_session() as session:
+            result = await session.execute(
+                select(Device).where(Device.token == token)
+            )
+            device = result.scalar_one_or_none()
+            if device:
+                device.enrolled_user_agent = user_agent
+                await session.commit()
+                return True
+            return False
+
+    async def list_devices(self) -> List[Device]:
+        """List all enrolled devices with their users."""
+        async with self.async_session() as session:
+            result = await session.execute(
+                select(Device).options(selectinload(Device.user)).order_by(Device.created_at.desc())
+            )
+            return list(result.scalars().all())
     
     async def add_template(
         self, user_id: int, template_path: str, quality: int
@@ -225,7 +308,18 @@ class Database:
                 .limit(1)
             )
             return result.scalar_one_or_none()
-    
+
+    async def get_user_punch_count_today(self, user_id: int) -> int:
+        """Get the number of punches for a user today (local time)."""
+        async with self.async_session() as session:
+            today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            result = await session.execute(
+                select(func.count(Punch.id))
+                .where(Punch.user_id == user_id)
+                .where(Punch.timestamp_local >= today_start)
+            )
+            return result.scalar() or 0
+
     async def get_unsynced_punches(self, limit: int = 100) -> List[Punch]:
         """Get punches that haven't been synced."""
         async with self.async_session() as session:
